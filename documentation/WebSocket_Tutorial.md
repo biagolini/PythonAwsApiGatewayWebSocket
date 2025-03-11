@@ -1,14 +1,14 @@
-# Setting Up a WebSocket API with AWS API Gateway and Lambda: Step-by-Step Tutorial
+# Building a Serverless Chat App Using API Gateway WebSocket API and Python Lambda
 
 ## Introduction
 
-### Overview
+#### Overview
 
 WebSockets enable a persistent, two-way communication channel between client and server, allowing data to be sent in real-time without polling​ ([Mozilla](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)). AWS API Gateway supports WebSocket APIs that can invoke AWS Lambda functions for managed serverless backend. In this tutorial, we will build a simple chat application using API Gateway (WebSocket) and Lambda, with a static web page using HTML, JavaScript, and CSS. This demonstrates how easily a WebSocket API can be integrated into a lightweight frontend that could even be hosted on static website hosters, like Amazon S3 or GitHub Pages.
 
-This project is **inspired** by the AWS tutorial and extends its functionality to explore additional interactions with WebSocket routes. Enhancements include a chat history, with ip identification of users, multi-table DynamoDB architecture, and refined session tracking. The original architecture can be found [here](https://docs.aws.amazon.com/apigateway/latest/developerguide/websocket-api-chat-app.html).
+This project is **inspired** by an [AWS tutorial](https://docs.aws.amazon.com/apigateway/latest/developerguide/websocket-api-chat-app.html) and extends its functionality to explore additional interactions with WebSocket routes. Enhancements include a chat history, with IP identification of users, multi-table DynamoDB architecture, and refined session tracking.
 
-### Architecture Overview
+#### Architecture
 
 The architecture consists of an API Gateway WebSocket endpoint that routes incoming WebSocket requests based on predefined routes. These routes trigger AWS Lambda functions, which handle different aspects of the chat system. The primary routes include:
 
@@ -21,7 +21,7 @@ Each Lambda function interacts with Amazon DynamoDB for data persistence, ensuri
 
 The figure below visually represents the architecture.
 
-![Architecture](img/architecture.png)
+![Architecture](img/architecture_websocket.png)
 
 #### DynamoDB Tables 
 
@@ -45,31 +45,37 @@ The following lists the expected fields for each of the DynamoDB tables used in 
 
 ## Step-by-step tutorial
 
-### Step 1: Create DynamoDB Tables
+#### Step 1: Create DynamoDB Tables
 
 To get started, create three DynamoDB tables using the AWS Console:
 
-1. **Go to the AWS Management Console** and open the DynamoDB service.
-2. **Create the following tables** with a single primary key (Partition Key):
+**Go to the AWS Management Console** and open the DynamoDB service.
+
+**Create the following tables** with a single primary key (Partition Key):
    - **ActiveConnections**: `connection_id` (String)
    - **SessionHistory**: `connection_id` (String)
    - **MessageHistory**: `message_id` (String)
-3. **Choose the "On-Demand" (serverless) billing mode**, as this is a Proof of Concept (PoC) and we want cost efficiency.
-4. **Finish and save** each table.
+
+**Choose the "On-Demand" (serverless) billing mode**, as this is a Proof of Concept (PoC) and we want cost efficiency.
+
+**Finish and save** each table.
 
 If you prefer, you can create the tables programmatically using AWS SDKs. The code to automate this setup is available in the repository: [GitHub](https://github.com/biagolini/PythonAwsApiGatewayWebSocket).
 
+![Architecture](img/dynamo01.png)
 
 ---
 
-### Step 2: Create Lambda Functions
+#### Step 2: Create Lambda Functions
 
 Create the following Lambda functions with their respective permission levels:
 
-- **`DefaultHandler`**: Requires access to **API Gateway Management API (`apigatewaymanagementapi`)** + **LambdaBasicExecutionRole**.
-- **`ConnectHandler`**: Requires permissions to **write to DynamoDB (`ActiveConnections` and `SessionHistory`)** + **LambdaBasicExecutionRole**.
-- **`DisconnectHandler`**: Requires permissions to **update and delete items in DynamoDB (`ActiveConnections` and `SessionHistory`)** + **LambdaBasicExecutionRole**.
-- **`SendMessageHandler`**: Requires permissions to **read from `ActiveConnections`, post messages via API Gateway Management API (`apigatewaymanagementapi`), and optionally write logs to S3** + **LambdaBasicExecutionRole**.
+- **`DefaultHandler`**: Requires access to **API Gateway Management API + LambdaBasicExecutionRole**.
+- **`ConnectHandler`**: Requires permissions to **write to DynamoDB tables `ActiveConnections` and `SessionHistory` + LambdaBasicExecutionRole**.
+- **`DisconnectHandler`**: Requires permissions to **update items in DynamoDB table `SessionHistory` + delete items in DynamoDB table `ActiveConnections` + LambdaBasicExecutionRole**.
+- **`SendMessageHandler`**: Requires permissions to **read from `ActiveConnections` + write to DynamoDB tables `MessageHistory`+  post messages via API Gateway Management API + LambdaBasicExecutionRole**.
+
+**Note**: In this tutorial, the default timeout setting was not modified, and the functions worked as expected with a 3-second timeout. However, if you expand or customize the Lambda functions to perform additional tasks, keep in mind that you may need to increase the timeout duration accordingly.
 
 #### DefaultHandler
 
@@ -94,12 +100,11 @@ Create the following Lambda functions with their respective permission levels:
 ```python
 # Code in folder `lambda_functions`
 ```
-
 ---
 
-### Step 3: Create a WebSocket API in AWS API Gateway
+#### Step 3: Create a WebSocket API in AWS API Gateway
 
-#### Step 3.1 Create the API Gateway WebSocket API
+##### Step 3.1 Create the API Gateway WebSocket API
 
 Sign in to the [API Gateway console](https://console.aws.amazon.com/apigateway).
 
@@ -107,15 +112,17 @@ Create a new WebSocket API:
 - Click on **Create API**.
 - Under **WebSocket API**, select **Build**.
 
+![Create a WebSocket API](img/api_gateway_01.png)
 
-#### Step 3.2 Configure API Settings
+##### Step 3.2 Configure API Settings
 
 Create a new WebSocket API:
 - **API name:** Enter `websocket-chat-app-tutorial`.
 - **Route selection expression:** Enter `request.body.action`. This expression tells API Gateway how to determine which route to invoke when a client sends a message.
 
+![Create a WebSocket API](img/api_gateway_02.png)
 
-#### Step 3.3 Define WebSocket Routes
+##### Step 3.3 Define WebSocket Routes
 
 In the **Predefined routes** section, add predefined WebSocket routes:
 - Click **Add $xxx route** buttons to add AWS predefined routes:
@@ -126,8 +133,9 @@ In the **Predefined routes** section, add predefined WebSocket routes:
 In the **Custom Routes** section, add the following custom route:
 - `sendmessage`: Handles message sending.
 
+![Create a WebSocket API](img/api_gateway_03.png)
 
-#### Step 3.4 Create Lambda Integrations for WebSocket Routes
+##### Step 3.4 Create Lambda Integrations for WebSocket Routes
 
 Assign Lambda functions to each route and enter the corresponding Lambda function ARN:
 - `$connect` → `arn:aws:lambda:us-east-1:123456789012:function:ConnectHandler`
@@ -135,59 +143,100 @@ Assign Lambda functions to each route and enter the corresponding Lambda functio
 - `$default` → `arn:aws:lambda:us-east-1:123456789012:function:DefaultHandler`
 - `sendmessage` → `arn:aws:lambda:us-east-1:123456789012:function:SendMessageHandler`
 
+![Create a WebSocket API](img/api_gateway_04.png)
 
-#### Step 3.5 Set Up a Deployment Stage
+##### Step 3.5 Set Up a Deployment Stage
 
 In the **Stages** section, define a **Stage name**, for instance: `dev`.
 
 Deploy the WebSocket API and wait a few seconds.
 
+![Create a WebSocket API](img/api_gateway_05.png)
 
-#### Step 3.6 Retrieve the WebSocket URL
+##### Step 3.6 Retrieve the WebSocket URL
 
 In the API Gateway console, click **Stages**. Locate the stage from the previous step (e.g., `dev`).
 
 Copy the **WebSocket URL**. This URL is required for clients to connect to the WebSocket server.
 
+![Create a WebSocket API](img/api_gateway_07.png)
+
 ---
 
 ## Step 4: Testing the WebSocket Connection in your terminal
 
-### 4.1 Create Connection
+##### Step 4.1 Establishing a WebSocket Connection
 
-Open two or more terminals. In each terminal, use the following command to connect to your API. When you connect to your API, API Gateway invokes the `$connect` route. This route calls a Lambda function that stores your connection ID in the `ActiveConnections` table and logs session details in the `SessionHistory` table.
+To test your WebSocket API, you need the `wscat` package, which allows you to connect and send messages through a WebSocket connection. First, check if `wscat` is installed on your system by running:
 
 ```bash
-wscat -c  wss://xxxxxxx.execute-api.us-east-1.amazonaws.com/dev/
+wscat --version
 ```
 
-For this to work, you need to install the `wscat` package, which is part of Node.js. Here are the commands to install it on Ubuntu and macOS. If you already have Node.js installed, simply run the installation command for `wscat`.
+If the command returns a version number, `wscat` is installed, and you can proceed. Otherwise, ensure you have [Node.js](https://nodejs.org/en) installed, then install `wscat` globally using:
 
-Install Node.js on Ubuntu:
-```bash
-sudo apt update
-sudo apt install -y nodejs npm
-```
-
-Install Node.js on macOS:
-```bash
-brew install node
-```
-
-Install `wscat` via npm:
 ```bash
 npm install -g wscat
 ```
 
-### 4.2 Confirm Connection
+Once `wscat` is installed, open two or more terminal windows. In each terminal, use the following command to connect to your WebSocket API:
 
-Access your DynamoDB tables and verify that the new connection has been recorded:
+```bash
+wscat -c wss://xxxxxxx.execute-api.us-east-1.amazonaws.com/dev/
+```
+
+Upon a successful connection, API Gateway will invoke the `$connect` route of your WebSocket API. The associated Lambda function will store your connection ID in the `ActiveConnections` table and log session details in the `SessionHistory` table.
+
+![Testing the WebSocket](img/test_websocket_01.png)
+
+
+##### Step 4.2 Confirm Message Sending
+
+After establishing the connection, you can proceed with sending and receiving messages as part of testing your WebSocket API.
+
+In one of the open chat terminals, send test messages to verify the WebSocket API is correctly processing and storing messages.
+
+To send a message, use the `wscat` client as follows:
+
+```bash
+wscat -c wss://xxxxxxx.execute-api.us-east-1.amazonaws.com/dev/
+```
+
+Once connected, send a test message by typing:
+
+```bash
+{"action":"sendmessage","message":"Hello, WebSocket!"}
+```
+
+This command sends a structured JSON message where:
+- `action` is set to `sendmessage`, matching the API Gateway route.
+- `message` contains the test message content.
+
+**Verify the Message in DynamoDB:**
+
+Access your **DynamoDB console** and navigate to the `MessageHistory` table to check if the message was recorded successfully.
+
+Ensure that a new entry exists with the following fields:
+- `message_id`: A randomly generated ID assigned to the message.
+- `connection_id`: The unique identifier of the sender’s connection.
+- `message`: The message content, e.g., `Hello, WebSocket!`.
+- `timestamp`: The UTC date and time when the message was sent.
+
+If the message is correctly stored, this confirms that your WebSocket API and Lambda functions are processing messages as expected.
+
+##### Step 4.3 Confirm DynamoDB tables
+
+Access your **Amazon DynamoDB** tables and verify that the new connection and message has been recorded correctly:
 
 **Check `ActiveConnections` Table:** Ensure that a new entry exists with the `connection_id` of the connected client.
 
-**Check `SessionHistory` Table:** Verify that an entry exists with the `connection_id`, `source_ip`, and `connected_at` timestamp.
+**Check `SessionHistory` Table:** Ensure that a new entry exists with the `connection_id`, `source_ip`, and `connected_at` timestamp.
 
-### 4.3 Disconnect
+**Check `MessageHistory` Table:** Ensure that a new entry exists with the `message_id`, `connection_id`, `message`, and `timestamp` fields.
+
+If all entries have been correctly recorded, your **WebSocket API and Lambda functions** are processing connections and messages as expected.
+
+##### Step 4.4 Disconnect
 
 Press `CTRL+C` to disconnect from your API. When a client disconnects from your API, API Gateway invokes the `$disconnect` route. The Lambda integration for your API's `$disconnect` route:
 
@@ -198,6 +247,10 @@ After disconnecting, access your DynamoDB tables again to confirm:
 
 - **`ActiveConnections` Table:** The connection ID should be removed.
 - **`SessionHistory` Table:** The corresponding entry should now have `disconnected_at` and `duration_seconds` fields populated.
+
+![Testing the WebSocket](img/test_websocket_05.png)
+
+![Testing the WebSocket](img/test_websocket_06.png)
 
 ---
 
@@ -217,7 +270,6 @@ The front-end consists of an HTML, JavaScript, and CSS-based web application tha
 
 For a fully functional implementation, including UI enhancements and additional features, refer to the [GitHub repository](https://github.com/biagolini/PythonAwsApiGatewayWebSocket) and test it via [GitHub Pages](https://biagolini.github.io/PythonAwsApiGatewayWebSocket/).
 
-
 ---
 
 ## Conclusion
@@ -225,3 +277,14 @@ For a fully functional implementation, including UI enhancements and additional 
 This tutorial demonstrated how to set up a **WebSocket API** using **AWS API Gateway and Lambda** to enable real-time communication. We built a **serverless chat application** with **session tracking, message broadcasting, and connection management** using **DynamoDB**. 
 
 With AWS’s **scalable and event-driven** capabilities, this setup can be expanded for authentication, user roles, or integration with other AWS services. For the full source code and future enhancements, visit the [GitHub repository](https://github.com/biagolini/PythonAwsApiGatewayWebSocket).
+
+---
+
+## Stay Connected
+
+If you found this guide helpful, stay connected for more insights on **AI, cloud security, and AWS automation**:
+- **LinkedIn:** [https://www.linkedin.com/in/biagolini](https://www.linkedin.com/in/biagolini)
+- **Medium:** [https://medium.com/@biagolini](https://medium.com/@biagolini)
+- **GitHub:** [https://github.com/biagolini](https://github.com/biagolini)
+
+Happy building with **AWS API Gateway WebSocket!** 🚀
