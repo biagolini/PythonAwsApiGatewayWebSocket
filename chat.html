@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebSocket Chat</title>
+    <link rel="stylesheet" href="./styles/chat.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h2>WebSocket Chat</h2>
+      <button id="logoutBtn">Logout</button>
+
+      <label for="wsUrl">WebSocket Address:</label>
+      <input type="text" id="wsUrl" placeholder="wss://example.com/dev/" />
+
+      <button id="connectBtn">Connect</button>
+
+      <div class="status-container">
+        <span>Status:</span>
+        <span id="statusIcon" class="status disconnected"></span>
+        <span id="statusText">Disconnected</span>
+        <div id="loginStatus">
+          <strong>Login Status:</strong>
+          <span id="loginState">Checking...</span>
+        </div>
+      </div>
+
+      <div class="session-container">
+        <strong>Connected at (UTC):</strong> <span id="connectedTime">---</span
+        ><br />
+        <strong>Session Duration:</strong>
+        <span id="sessionDuration">0</span> seconds
+        <br />
+        <strong>Token Validity:</strong>
+        <span id="tokenCountdown">Checking...</span>
+      </div>
+
+      <div class="auto-disconnect-container">
+        <div class="auto-disconnect-option">
+          <label for="autoDisconnectCheck">Auto Disconnect:</label>
+          <input type="checkbox" id="autoDisconnectCheck" />
+        </div>
+        <div class="auto-disconnect-time">
+          <input type="number" id="autoDisconnectTime" value="60" disabled />
+          <span>seconds</span>
+        </div>
+      </div>
+
+      <div class="chat-box">
+        <h3>Notifications</h3>
+        <textarea id="chatLog" readonly></textarea>
+      </div>
+
+      <div class="message-box">
+        <input
+          type="text"
+          id="messageInput"
+          placeholder="Type your message..."
+        />
+        <button id="sendBtn">&gt;</button>
+      </div>
+    </div>
+
+    <script src="./scripts/chat.js"></script>
+  </body>
+</html>

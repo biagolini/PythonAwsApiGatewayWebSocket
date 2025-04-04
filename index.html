@@ -1,59 +1,51 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebSocket Chat</title>
+    <title>Secure Chat Login</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="styles/login.css" />
   </head>
   <body>
     <div class="container">
-      <h2>WebSocket Chat</h2>
+      <h1>Secure WebSocket Chat</h1>
 
-      <label for="wsUrl">WebSocket Address:</label>
-      <input type="text" id="wsUrl" placeholder="wss://example.com/dev/" />
-
-      <button id="connectBtn">Connect</button>
-
-      <div class="status-container">
-        <span>Status:</span>
-        <span id="statusIcon" class="status disconnected"></span>
-        <span id="statusText">Disconnected</span>
-      </div>
-
-      <div class="session-container">
-        <strong>Connected at (UTC):</strong> <span id="connectedTime">---</span
-        ><br />
-        <strong>Session Duration:</strong>
-        <span id="sessionDuration">0</span> seconds
-      </div>
-
-      <div class="auto-disconnect-container">
-        <div class="auto-disconnect-option">
-          <label for="autoDisconnectCheck">Auto Disconnect:</label>
-          <input type="checkbox" id="autoDisconnectCheck" />
-        </div>
-        <div class="auto-disconnect-time">
-          <input type="number" id="autoDisconnectTime" value="60" disabled />
-          <span>seconds</span>
-        </div>
-      </div>
-
-      <div class="chat-box">
-        <h3>Notifications</h3>
-        <textarea id="chatLog" readonly></textarea>
-      </div>
-
-      <div class="message-box">
+      <!-- Section: Login -->
+      <div id="login-section">
+        <label for="apiUrl">Auth API URL</label>
         <input
           type="text"
-          id="messageInput"
-          placeholder="Type your message..."
+          id="apiUrl"
+          placeholder="https://example.com/dev/auth"
         />
-        <button id="sendBtn">&gt;</button>
+
+        <label for="username">User ID</label>
+        <input type="text" id="username" placeholder="Enter your user ID" />
+
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Enter your password"
+        />
+
+        <button id="loginButton">Login</button>
+        <button id="guestButton">Access Without Login</button>
+
+        <div id="loginError" class="error-message"></div>
+      </div>
+
+      <!-- Section: Already Logged In -->
+      <div id="loggedin-section" class="hidden">
+        <p>You are already logged in.</p>
+        <p>Redirecting to chat in <span id="countdown">5</span> seconds...</p>
+        <button id="logoutButton">Logout</button>
+        <button id="goNowButton">Go Now</button>
       </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="scripts/login.js"></script>
   </body>
 </html>

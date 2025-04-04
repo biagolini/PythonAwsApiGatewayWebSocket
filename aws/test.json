@@ -1,0 +1,52 @@
+{
+  "type": "REQUEST",
+  "methodArn": "arn:aws:execute-api:us-east-1:533267098598:11qkdnqm1l/dev/$connect",
+  "headers": {
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0dXNlciIsImV4cCI6MTc0NDIzNzE2NH0.3G3-Tz2CN01VNZT3ZJ8CKWDg8a64bpFTS1ywWfZ7F60",
+    "Connection": "upgrade",
+    "content-length": "0",
+    "Host": "11qkdnqm1l.execute-api.us-east-1.amazonaws.com",
+    "Sec-WebSocket-Extensions": "permessage-deflate; client_max_window_bits",
+    "Sec-WebSocket-Key": "Q9M2LenLD0m/WzahrYzIfQ==",
+    "Sec-WebSocket-Version": "13",
+    "Upgrade": "websocket",
+    "X-Amzn-Trace-Id": "Root=1-67edc591-23d2a8b662623f6e4769e926",
+    "X-Forwarded-For": "179.247.132.127",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "multiValueHeaders": {
+    "Authorization": [
+      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0dXNlciIsImV4cCI6MTc0NDIzNzE2NH0.3G3-Tz2CN01VNZT3ZJ8CKWDg8a64bpFTS1ywWfZ7F60"
+    ],
+    "Connection": ["upgrade"],
+    "content-length": ["0"],
+    "Host": ["11qkdnqm1l.execute-api.us-east-1.amazonaws.com"],
+    "Sec-WebSocket-Extensions": ["permessage-deflate; client_max_window_bits"],
+    "Sec-WebSocket-Key": ["Q9M2LenLD0m/WzahrYzIfQ=="],
+    "Sec-WebSocket-Version": ["13"],
+    "Upgrade": ["websocket"],
+    "X-Amzn-Trace-Id": ["Root=1-67edc591-23d2a8b662623f6e4769e926"],
+    "X-Forwarded-For": ["179.247.132.127"],
+    "X-Forwarded-Port": ["443"],
+    "X-Forwarded-Proto": ["https"]
+  },
+  "queryStringParameters": {},
+  "multiValueQueryStringParameters": {},
+  "stageVariables": {},
+  "requestContext": {
+    "routeKey": "$connect",
+    "eventType": "CONNECT",
+    "extendedRequestId": "IavOyGGaIAMEAVg=",
+    "requestTime": "02/Apr/2025:23:17:37 +0000",
+    "messageDirection": "IN",
+    "stage": "dev",
+    "connectedAt": 1743635857457,
+    "requestTimeEpoch": 1743635857471,
+    "identity": { "sourceIp": "179.247.132.127" },
+    "requestId": "IavOyGGaIAMEAVg=",
+    "domainName": "11qkdnqm1l.execute-api.us-east-1.amazonaws.com",
+    "connectionId": "IavOyckoIAMCKFA=",
+    "apiId": "11qkdnqm1l"
+  }
+}

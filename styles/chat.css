@@ -1,0 +1,182 @@
+/* General Page Styles */
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #f4f4f4;
+}
+
+.container {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  width: 95%;
+  max-width: 600px;
+  height: 95%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Input Fields */
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+/* Buttons */
+button {
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background 0.3s;
+}
+
+/* Status Section */
+.status-container, .session-container {
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.status {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.disconnected {
+  background: red;
+}
+
+.connected {
+  background: green;
+}
+
+.connecting {
+  background: orange;
+}
+
+/* Chat Box */
+.chat-box {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.chat-box h3 {
+  margin-bottom: 5px;
+  font-size: 16px;
+  text-align: left;
+}
+
+#chatLog {
+  width: 100%;
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  padding: 10px;
+  resize: none;
+  overflow-y: auto;
+  font-size: 14px;
+  background: #f9f9f9;
+  border-radius: 5px;
+}
+
+/* Message Input Section */
+.message-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.message-box input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.message-box button {
+  width: 50px;
+  height: 50px;
+  font-size: 22px;
+  background: #007BFF;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.message-box button:hover {
+  background: #0056b3;
+}
+
+/* Mobile Optimization */
+@media (max-width: 450px) {
+  .container {
+    width: 95%;
+    height: 95%;
+    padding: 15px;
+  }
+
+  input {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  #chatLog {
+    font-size: 13px;
+  }
+
+  .message-box input {
+    font-size: 14px;
+  }
+
+  .message-box button {
+    width: 45px;
+    height: 45px;
+    font-size: 20px;
+  }
+}
+
+.auto-disconnect-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 10px;
+  gap: 5px;
+}
+
+.auto-disconnect-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auto-disconnect-time {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.auto-disconnect-time input {
+  width: 60px;
+  text-align: center;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}

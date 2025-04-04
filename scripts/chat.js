@@ -25,25 +25,31 @@ document.getElementById('connectBtn').addEventListener('click', () => {
 })
 
 function connectWebSocket(wsUrl) {
+  const token = localStorage.getItem('authToken')
+  let fullWsUrl = wsUrl
+
+  if (token) {
+    const encodedToken = encodeURIComponent(`Bearer ${token}`)
+    const separator = wsUrl.includes('?') ? '&' : '?'
+    fullWsUrl = `${wsUrl}${separator}Authorization=${encodedToken}`
+    console.log('Attempting WebSocket connection with token.')
+  } else {
+    console.log('Attempting WebSocket connection without token.')
+  }
+
   updateStatus('Connecting...', 'connecting')
-  socket = new WebSocket(wsUrl)
+  socket = new WebSocket(fullWsUrl)
 
   socket.onopen = () => {
     updateStatus('Connected', 'connected')
 
-    // Store connection timestamp
     const currentTime = new Date().toISOString()
     document.getElementById('connectedTime').textContent = currentTime
 
-    // Reset session timer
     elapsedTime = 0
     updateSessionTimer()
     startSessionTimer()
-
-    // Start heartbeat
     startHeartbeat()
-
-    // Handle auto-disconnect if enabled
     handleAutoDisconnect()
   }
 
@@ -51,7 +57,6 @@ function connectWebSocket(wsUrl) {
     console.log('Message Received:', event.data)
     const data = JSON.parse(event.data)
 
-    // Ignore "pong" messages
     if (data.message && data.message.toLowerCase() !== 'pong') {
       addMessageToChat(data.message)
     }
@@ -174,3 +179,48 @@ function handleAutoDisconnect() {
     }, time)
   }
 }
+
+// Logout Button
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  localStorage.clear()
+  window.location.href = 'index.html'
+})
+
+// Check login status
+function updateLoginStatus() {
+  const loginStateElement = document.getElementById('loginState')
+  const token = localStorage.getItem('authToken')
+
+  if (token) {
+    loginStateElement.textContent = 'Logged in'
+  } else {
+    loginStateElement.textContent = 'Not logged in'
+  }
+}
+
+// Token countdown logic
+function updateTokenCountdown() {
+  const countdownElement = document.getElementById('tokenCountdown')
+  const exp = parseInt(localStorage.getItem('exp'), 10)
+
+  if (!exp || isNaN(exp)) {
+    countdownElement.textContent = 'No token information available'
+    return
+  }
+
+  const now = Math.floor(Date.now() / 1000)
+  const remaining = exp - now
+
+  if (remaining > 0) {
+    countdownElement.textContent = `${remaining} seconds remaining`
+  } else {
+    countdownElement.textContent = 'Token is no longer valid'
+  }
+}
+
+// Start interval for login status and token countdown
+document.addEventListener('DOMContentLoaded', () => {
+  updateLoginStatus()
+  updateTokenCountdown()
+  setInterval(updateTokenCountdown, 1000)
+})

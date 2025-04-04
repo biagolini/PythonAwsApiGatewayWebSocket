@@ -38,9 +38,19 @@ The figure below visually represents the architecture.
 ## Repository Structure
 
 ```
-├── index.html                 # Front-end interface for the chat
-├── script.js                  # WebSocket connection and UI logic
-├── style.css                  # Styling for the chat UI
+│
+├── index.html            # Página inicial com lógica de login/autenticação
+├── style.css             # Estilos globais (ex: reset, fontes, layout base)
+│
+├── /styles
+│   └── login.css         # Estilos específicos para index.html (login page)
+│
+├── /scripts
+│   └── login.js          # Lógica de verificação de token, login, redirecionamento
+│
+├── chat.html             # Tela principal do chat (acesso pós-autenticação)
+├── /styles/chat.css      # Estilo específico do chat
+├── /scripts/chat.js      # Lógica do chat (WebSocket, renderização de mensagens)
 ├── documentation/             # Documentation & backend code
 │   ├── lambda_functions/      # AWS Lambda function implementations
 │   ├── dynamo_setup.py        # Script to create DynamoDB tables

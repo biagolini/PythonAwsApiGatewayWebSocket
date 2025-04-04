@@ -1,3 +1,5 @@
+/* style.css */
+
 /* General Page Styles */
 body {
   font-family: Arial, sans-serif;
@@ -17,16 +19,18 @@ body {
   text-align: center;
   width: 95%;
   max-width: 600px;
-  height: 95%;
+  height: auto;
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 /* Input Fields */
 input {
   width: 100%;
   padding: 10px;
-  margin: 10px 0;
+  margin-top: 5px;
+  margin-bottom: 15px;
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 16px;
@@ -34,101 +38,54 @@ input {
 
 /* Buttons */
 button {
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-  transition: background 0.3s;
-}
-
-/* Status Section */
-.status-container, .session-container {
+  padding: 10px 20px;
   margin-top: 5px;
-  font-size: 14px;
-}
-
-.status {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.disconnected {
-  background: red;
-}
-
-.connected {
-  background: green;
-}
-
-.connecting {
-  background: orange;
-}
-
-/* Chat Box */
-.chat-box {
-  flex: 1;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  margin-top: 10px;
-}
-
-.chat-box h3 {
-  margin-bottom: 5px;
-  font-size: 16px;
-  text-align: left;
-}
-
-#chatLog {
-  width: 100%;
-  flex-grow: 1;
-  border: 1px solid #ccc;
-  padding: 10px;
-  resize: none;
-  overflow-y: auto;
-  font-size: 14px;
-  background: #f9f9f9;
-  border-radius: 5px;
-}
-
-/* Message Input Section */
-.message-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.message-box input {
-  flex: 1;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-}
-
-.message-box button {
-  width: 50px;
-  height: 50px;
-  font-size: 22px;
-  background: #007BFF;
+  margin-bottom: 10px;
+  border: none;
+  background-color: #007BFF;  
   color: white;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-.message-box button:hover {
-  background: #0056b3;
+#guestButton{
+    background-color: green;
+    color: white; 
+  }
+  #logoutButton{
+    background-color: rgb(226, 75, 75);
+    color: white; 
+  }
+  
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Utility Classes */
+.hidden {
+  display: none;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: -10px;
+}
+
+/* Section titles and labels */
+label {
+  display: block;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 10px;
 }
 
 /* Mobile Optimization */
 @media (max-width: 450px) {
   .container {
     width: 95%;
-    height: 95%;
     padding: 15px;
   }
 
@@ -137,18 +94,9 @@ button {
     padding: 8px;
   }
 
-  #chatLog {
-    font-size: 13px;
-  }
-
-  .message-box input {
-    font-size: 14px;
-  }
-
-  .message-box button {
-    width: 45px;
-    height: 45px;
-    font-size: 20px;
+  button {
+    font-size: 15px;
+    padding: 8px 16px;
   }
 }
 
