@@ -10,28 +10,34 @@ This project demonstrates:
 - **WebSocket API Gateway integration** for real-time communication.
 - **AWS Lambda functions** handling connection, disconnection, and messaging events.
 - **DynamoDB storage** for active connections, session logs, and message history.
-- **A front-end chat client** with automatic connection, session tracking, and an optional auto-disconnect feature.
-- **Heartbeat messages** to keep WebSocket connections active and prevent premature disconnection by AWS API Gateway.
-
+- **A front-end chat client** with login/authentication flow, session tracking, and optional auto-disconnect.
+- **JWT-based authentication** integrated into the WebSocket handshake using Lambda Authorizer.
+- **Heartbeat messages** to keep WebSocket connections alive.
 
 ### Architecture Overview
 
-This project is **inspired** by the AWS tutorial and extends its functionality to explore additional interactions with WebSocket routes. Enhancements include a chat history, with ip identification of users, multi-table DynamoDB architecture, and refined session tracking. The original architecture can be found [here](https://docs.aws.amazon.com/apigateway/latest/developerguide/websocket-api-chat-app.html).
+This project is inspired by the official AWS tutorial and expands its functionality by adding secure access via JWT, improved session tracking, and a login interface. The original architecture can be found [here](https://docs.aws.amazon.com/apigateway/latest/developerguide/websocket-api-chat-app.html).
 
-The architecture consists of an API Gateway WebSocket endpoint that routes incoming WebSocket requests based on predefined routes. These routes trigger AWS Lambda functions, which handle different aspects of the chat system. The primary routes include:
+The architecture includes:
 
-- **`$connect` Route**: Triggers the `ConnectHandler` Lambda function, which registers the new client connection in the `ActiveConnections` table and logs session details in the `SessionHistory` table.
-- **`$disconnect` Route**: Triggers the `DisconnectHandler` Lambda function, which removes the client connection from the `ActiveConnections` table and updates session details in the `SessionHistory` table.
-- **`sendmessage` Route**: Triggers the `SendMessageHandler` Lambda function, which processes incoming chat messages and stores them in the `MessageHistory` table.
-- **`$default` Route**: Triggers the `DefaultHandler` Lambda function to manage unexpected messages or routes.
+- An **API Gateway WebSocket API** routing events to Lambda functions:
+  - **`$connect` Route**: Registers client in DynamoDB and authenticates using a custom Lambda Authorizer.
+  - **`$disconnect` Route**: Removes connection from the active list and updates session logs.
+  - **`sendmessage` Route**: Broadcasts chat messages and logs them in a message table.
+  - **`$default` Route**: Handles unexpected or invalid messages.
 
-Each Lambda function interacts with Amazon DynamoDB for data persistence, ensuring efficient storage and retrieval of connection states, session details, and chat messages. The API Gateway Management API enables broadcasting messages back to connected clients.
+- A **Lambda Authorizer** used on the `$connect` route, which validates a **JWT** passed via **query string**, enabling secure authentication even in browser environments.
 
-The figure below visually represents the architecture.
+- A **DynamoDB backend** with:
+  - `ActiveConnections` table
+  - `SessionHistory` table
+  - `MessageHistory` table
+
+- A **static front-end** deployed on GitHub Pages with two main views:
+  - **index.html** for login
+  - **chat.html** for WebSocket interaction
 
 ![Architecture](documentation/img/architecture.png)
-
-
 
 ---
 
@@ -39,23 +45,23 @@ The figure below visually represents the architecture.
 
 ```
 │
-├── index.html            # Página inicial com lógica de login/autenticação
-├── style.css             # Estilos globais (ex: reset, fontes, layout base)
+├── index.html                # Login page
+├── chat.html                 # Main chat interface
 │
 ├── /styles
-│   └── login.css         # Estilos específicos para index.html (login page)
+│   ├── login.css             # Styles for login
+│   └── chat.css              # Styles for chat
 │
 ├── /scripts
-│   └── login.js          # Lógica de verificação de token, login, redirecionamento
+│   ├── login.js              # Login logic, JWT handling
+│   └── chat.js               # WebSocket connection, messaging, session features
 │
-├── chat.html             # Tela principal do chat (acesso pós-autenticação)
-├── /styles/chat.css      # Estilo específico do chat
-├── /scripts/chat.js      # Lógica do chat (WebSocket, renderização de mensagens)
-├── documentation/             # Documentation & backend code
-│   ├── lambda_functions/      # AWS Lambda function implementations
-│   ├── dynamo_setup.py        # Script to create DynamoDB tables
-│   ├── WebSocket_Tutorial.md  # Step-by-step implementation guide
-└── README.md                  # Project documentation
+├── documentation/
+│   ├── lambda_functions/     # Python Lambda functions
+│   ├── dynamo_setup.py       # DynamoDB table creation script
+│   └── WebSocket_Tutorial.md # Full implementation tutorial
+│
+└── README.md                 # Project overview
 ```
 
 ---
@@ -70,37 +76,50 @@ Before using this project, ensure you have:
 
 ## Step 1: Clone the Repository
 
-Clone this repository to your local machine:
-
 ```bash
 git clone https://github.com/biagolini/WebSocketChatAWS.git
 ```
 
 ---
 
-## Step 2: Deploy the Backend (AWS WebSocket API & Lambda)
+## Step 2: Deploy the Backend (WebSocket API & Lambda)
 
-Follow the steps outlined in **`documentation/WebSocket_Tutorial.md`** to:
-1. **Create DynamoDB tables** for connection tracking and chat history.
-2. **Deploy AWS Lambda functions** for handling WebSocket connections.
-3. **Set up API Gateway (WebSocket)** to route WebSocket events.
-4. **Integrate Lambda functions with API Gateway WebSocket routes.**
-5. **Deploy the WebSocket API** and obtain the WebSocket connection URL.
+Follow the guide in `documentation/WebSocket_Tutorial.md` to:
+1. Create the required DynamoDB tables.
+2. Deploy the Lambda functions to handle `$connect`, `$disconnect`, `sendmessage`, and `$default` routes.
+3. Set up and deploy the WebSocket API via API Gateway.
+4. Attach the Lambda Authorizer to the `$connect` route.
+5. Use JWTs passed in query strings for authentication (due to browser WebSocket limitations).
 
 ---
 
-## Step 3: Configure and Run the Front-End
+## Step 3: Run the Front-End Client
 
-1. **Open `index.html`** in a browser.
-2. **Enter the WebSocket API URL** obtained from Step 2.
-3. Click **Connect** to establish a WebSocket connection.
-4. Start sending messages in real-time to connected users.
+1. Open `index.html` in your browser.
+2. Enter the login credentials and obtain a JWT.
+3. On successful login, the user is redirected to `chat.html`.
+4. The token is appended as a query parameter to the WebSocket URL.
+5. Start chatting with other connected users!
 
-### Features
-- **Automatic Reconnection**: If a previous WebSocket address is stored, the app automatically reconnects.
-- **Session Tracking**: Displays connection ID, timestamp, and a live session timer.
-- **Heartbeat Ping**: Sends a message every 30 seconds to prevent disconnection.
-- **Auto-Disconnect**: Users can set a time limit for their session, after which they are automatically disconnected.
+### Chat Client Features
+- **JWT authentication** via Lambda Authorizer.
+- **Session timer** and connection timestamp.
+- **Token expiration countdown.**
+- **Auto-disconnect feature** for session-limited users.
+- **Live message exchange** and logging in DynamoDB.
+- **Logout button** to clear session and return to login.
+
+---
+
+## Testing
+
+- Use `wscat` to manually test WebSocket connections:
+
+```bash
+wscat -c "wss://your-api-id.execute-api.region.amazonaws.com/dev/?token=Bearer%20<your_jwt>"
+```
+
+- Open the [live front-end](https://biagolini.github.io/PythonAwsApiGatewayWebSocket/) in your browser to simulate real-user interaction.
 
 ---
 
@@ -118,4 +137,3 @@ Contributions are welcome! Feel free to:
 This project is open-source and available under the **MIT License**. You are free to modify and use it, but must adhere to AWS service usage policies.
 
 For the complete implementation and updates, check the [GitHub repository](https://github.com/biagolini/WebSocketChatAWS).
-
